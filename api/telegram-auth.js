@@ -31,3 +31,8 @@ export default async function handler(req, res) {
     res.status(500).send("Error: " + err.message);
   }
 }
+
+export default function handler(req, res) {
+  // просто для теста
+  res.redirect("/"); 
+}
