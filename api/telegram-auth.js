@@ -1,28 +1,17 @@
 import fetch from "node-fetch";
 
 export default async function handler(req, res) {
-  const { id, first_name, username, hash } = req.query;
+  const { id, first_name, username } = req.query;
 
-  if (!id || !hash) {
-    return res.status(400).send("Missing Telegram parameters");
+  if (!id) {
+    return res.status(400).send("No Telegram ID");
   }
 
-  // --- проверка подписи Telegram (минимальная) ---
-  // для MVP можно пропустить и доверять Telegram, но лучше потом добавить полноценную проверку
-
-  // --- вставляем пользователя в Supabase ---
-  const SUPABASE_URL = "https://your-supabase-url.supabase.co";
-  const SUPABASE_KEY = "YOUR_SUPABASE_ANON_KEY";
-
-  const body = {
-    telegram_id: id,
-    first_name,
-    username,
-    public_name: first_name
-  };
+  const SUPABASE_URL = "https://xitwqyasjsaptwmbqnrd.supabase.co"; // вставь свой URL
+  const SUPABASE_KEY = "sb_secret_d3Guu5WQSYk5oFEcLOd9Tg_8wzewt9q"; // твой secret key
 
   try {
-    const response = await fetch(`${SUPABASE_URL}/rest/v1/users`, {
+    await fetch(`${SUPABASE_URL}/rest/v1/users`, {
       method: "POST",
       headers: {
         "apikey": SUPABASE_KEY,
@@ -30,16 +19,15 @@ export default async function handler(req, res) {
         "Content-Type": "application/json",
         "Prefer": "return=minimal"
       },
-      body: JSON.stringify(body)
+      body: JSON.stringify({
+        telegram_id: id,
+        username,
+        first_name
+      })
     });
 
-    if (response.ok) {
-      res.redirect("/"); // редирект на главную после логина
-    } else {
-      const text = await response.text();
-      res.status(500).send("Supabase error: " + text);
-    }
+    res.redirect("/"); // редирект после логина
   } catch (err) {
-    res.status(500).send("Server error: " + err.message);
+    res.status(500).send("Error: " + err.message);
   }
 }
